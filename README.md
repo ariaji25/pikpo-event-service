@@ -1,6 +1,6 @@
 # PIKPO Events Service
 
-A GRPC Service for create events with support recurring event
+A GRPC Service for creating events with support recurring event
 
 # Generate rpc from proto
 
@@ -20,9 +20,9 @@ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=p
 4. Run the test
 ```go test ./app/events/```
 
-Run with native code withou docker
-1. Run the database first with docker like first step above
-2. Create an environment variable to define if it run natively
+Run with native code without docker
+1. Run the database first with docker like the first step above
+2. Create an environment variable to define if it runs natively
 ``` export mode=native```
 4. Run the service
 ``` go run main.go```
