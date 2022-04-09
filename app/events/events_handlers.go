@@ -39,10 +39,15 @@ func (event *EventItem) validate() (err error) {
 		return err
 	}
 
-	_, err = utils.ToDateTime(event.Date)
+	date, err := utils.ToDateTime(event.Date)
 	if err != nil {
 		return err
 	}
+
+	if int(date.Weekday()) == 0 || int(date.Weekday()) == 6 {
+		return errors.New("Just allow weekdays event")
+	}
+
 	return nil
 }
 
@@ -50,16 +55,43 @@ func (e *EventItem) validateConflict() (*sql.Rows, error) {
 	log.Println("Validate event ", e)
 	switch e.EventType {
 	case EVENT_TYPE_DAYLY:
-		return validateDaylylyEvent(e)
+		return validateDaylyEvent(e)
 	case EVENT_TYPE_WEEKLY:
 		return validateWeeklyEvent(e)
 	case EVENT_TYPE_MONTHLY:
 		return validateMonthlyEvent(e)
+	case EVENT_TYPE_ONE_DAY:
+		return validateOneDayEvent(e)
 	}
 	return nil, errors.New("Unrecognized event type")
 }
 
-func validateDaylylyEvent(event *EventItem) (*sql.Rows, error) {
+func validateOneDayEvent(event *EventItem) (*sql.Rows, error) {
+	startTime, _ := utils.ToTime(event.StartTime)
+	endTime, _ := utils.ToTime(event.EndTime)
+	date, _ := utils.ToDateTime(event.Date)
+	return database.Database.DB.Query(`
+		SELECT 
+			count(id)
+		FROM events 
+		WHERE
+		(	
+			(TO_TIMESTAMP(start_time, 'HH24:MM:SS') >= $1
+		AND
+			TO_TIMESTAMP(end_time, 'HH24:MM:SS') <= $2)
+		OR
+			allday = true
+		)
+		AND 
+			date = $3
+		`,
+		startTime,
+		endTime,
+		date,
+	)
+}
+
+func validateDaylyEvent(event *EventItem) (*sql.Rows, error) {
 	startTime, _ := utils.ToTime(event.StartTime)
 	endTime, _ := utils.ToTime(event.EndTime)
 
@@ -68,15 +100,15 @@ func validateDaylylyEvent(event *EventItem) (*sql.Rows, error) {
 			count(id)
 		FROM events 
 		WHERE
-			TO_TIMESTAMP(start_time, 'HH24:MM:SS') >= $1
+		(	
+			(TO_TIMESTAMP(start_time, 'HH24:MM:SS') >= $1
 		AND
-			TO_TIMESTAMP(end_time, 'HH24:MM:SS') <= $2
+			TO_TIMESTAMP(end_time, 'HH24:MM:SS') <= $2)
+		OR
+			allday = true
+		)
 		AND 
 			event_type = $3
-		AND
-			extract(dow from events.date) != 0
-		AND
-			extract(dow from events.date) != 6 
 	`,
 		startTime,
 		endTime,
@@ -94,9 +126,13 @@ func validateWeeklyEvent(event *EventItem) (*sql.Rows, error) {
 			count(id)
 		FROM events 
 		WHERE
-			TO_TIMESTAMP(start_time, 'HH24:MM:SS') >= $1
+		(	
+			(TO_TIMESTAMP(start_time, 'HH24:MM:SS') >= $1
 		AND
-			TO_TIMESTAMP(end_time, 'HH24:MM:SS') <= $2
+			TO_TIMESTAMP(end_time, 'HH24:MM:SS') <= $2)
+		OR
+			allday = true
+		)
 		AND 
 			event_type = $3
 		AND
@@ -119,9 +155,13 @@ func validateMonthlyEvent(event *EventItem) (*sql.Rows, error) {
 			count(id)
 		FROM events 
 		WHERE
-			TO_TIMESTAMP(start_time, 'HH24:MM:SS') >= $1
+		(	
+			(TO_TIMESTAMP(start_time, 'HH24:MM:SS') >= $1
 		AND
-			TO_TIMESTAMP(end_time, 'HH24:MM:SS') <= $2
+			TO_TIMESTAMP(end_time, 'HH24:MM:SS') <= $2)
+		OR
+			allday = true
+		)
 		AND 
 			event_type = $3
 		AND

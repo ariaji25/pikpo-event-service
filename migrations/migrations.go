@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	if os.Getenv("MODE") == "native" {
+	if os.Getenv("mode") == "native" {
 		godotenv.Load(".env")
 	}
 	// Read database config from env values

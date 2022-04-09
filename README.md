@@ -15,7 +15,7 @@ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=p
 ``` docker-compose up -d db```
 2. Run the migrations
 ``` docker-compose up migration```
-3. Run the test
-```go test```
-4. Run the service
+3. Run the service
 ``` docker-compose up -d event```
+4. Run the test
+```go test```
