@@ -1,0 +1,9 @@
+FROM golang
+
+WORKDIR /usr/srcdock/app
+
+COPY ./migrations ./migrations
+COPY go.mod .
+COPY go.sum .
+RUN go mod tidy
+CMD [ "go", "run", "migrations/migrations.go" ]

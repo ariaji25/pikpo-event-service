@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+
+option go_package = "com.pikpo.events/app/events";
+option java_multiple_files = true;
+option java_package = "com.pikpo.events.app.events";
+
+package events;
+
+enum EVENT_TYPE {
+    ONE_DAY= 0;
+	WEEK_DAYS= 1;
+	DAYLY= 2;
+	WEEKLY= 3;
+	MONTHLY= 5;
+}
+
+message EventItem {
+    string id=1;
+	string name=2;
+	string date=3;
+	string start_time=4;
+	string end_time=5;
+	EVENT_TYPE event_type=6;
+	bool allday=7;
+	string created_at=8;
+	string updated_at=9;
+	string deleted_at=10;
+    string time_zone=11;
+}
+
+message GetEventRequest {
+    int32 limit=1;
+    int32 page=2;
+    int32 month=3;
+    int32 year=4;
+}
+
+message GetEventResponse {
+    GetEventRequest meta=1;
+    repeated EventItem data=2;
+}
+
+message EventByID {
+	string id= 1;
+}
+
+message DeleteResponse {
+	string message=1;
+}
+
+service Event {
+    rpc CreateEvent(EventItem) returns (EventItem){}
+    rpc GetEvents(GetEventRequest) returns (GetEventResponse){}
+	rpc UpdateEvent(EventItem) returns (EventItem){}
+	rpc DeleteEvent(EventByID) returns (DeleteResponse) {}
+}
