@@ -18,4 +18,16 @@ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=p
 3. Run the service
 ``` docker-compose up -d event```
 4. Run the test
-```go test```
+```go test ./app/events/```
+
+Run with native code withou docker
+1. Run the database first with docker like first step above
+2. Create an environment variable to define if it run natively
+``` export mode=native```
+4. Run the service
+``` go run main.go```
+5. Run the Unit test
+``` go test ./app/events```
+
+
+Notes : To run the unit test make sure the service is running on the port 8000,
